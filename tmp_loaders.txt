@@ -1,0 +1,7 @@
+INQLOAD_SUBJECT:"<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head><meta charset=\"utf-8\">\r\n<meta http-equ"
+
+SAMPLOAD_NOTES:"notes:       r.notes || '',\r\n    }));\r\n    const pending = DB.samples.filter(s ="
+
+SAMP_UPDATE:"await _sb.from('samples').update({ stage: newStage }).eq('sample_id', sampId);\r\n    samp._pipeline_s"
+
+getSampStage:"getSampStage = sp => sp._pipeline_stage || sp.stage || 'samp"

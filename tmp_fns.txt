@@ -1,0 +1,5 @@
+FUP_FN:
+"function openFollowupModal(leadId) {\r\n  currentFollowupLeadId = leadId;\r\n  const lead = DB.leads.find(l => l.id === leadId);\r\n  if (!lead) return;\r\n\r\n  document.getElementById('followup-modal-title').textContent = `Follow-up #${lead.followupCount + 1} — ${lead.company}`;\r\n\r\n  // Set default next fol"
+
+SAVE_FN:
+"async function saveFollowup() {\r\n  const leadId = currentFollowupLeadId;\r\n  const lead = DB.leads.find(l => l.id === leadId);\r\n  if (!lead) return;\r\n\r\n  const notes = document.getElementById('fu-notes')?.value?.trim();\r\n  const fuDate = document.getElementById('fu-date')?.value;\r\n  if (!notes || !fuDate) { showToast('Notes and next follow-up date are required', 'error'); return; }\r\n\r\n  if (lead.fo"

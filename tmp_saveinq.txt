@@ -1,0 +1,86 @@
+async function saveInquiry() {
+  const company      = document.getElementById('inq-company')?.value.trim();
+  const capturedFrom = document.getElementById('inq-captured-from')?.value;
+  const product      = document.getElementById('inq-product')?.value;
+
+  if (!company)      { showToast('Company name is required', 'error'); return; }
+  if (!capturedFrom) { showToast('Please select enquiry source', 'error'); return; }
+  if (!product)      { showToast('Please select a product', 'error'); return; }
+
+  const btn = document.getElementById('inq-save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  const custType  = document.getElementById('inq-customer-type')?.value || 'new';
+  const custId    = document.getElementById('inq-customer-id')?.value   || null;
+  const contact   = document.getElementById('inq-contact')?.value.trim() || '';
+  const email     = document.getElementById('inq-email')?.value.trim()   || '';
+  const phone     = document.getElementById('inq-phone')?.value.trim()   || '';
+  const quantity  = document.getElementById('inq-quantity')?.value.trim()|| '';
+  const estValue  = parseFloat(document.getElementById('inq-est-value')?.value) || null;
+  const notes     = document.getElementById('inq-notes')?.value.trim()   || '';
+  const today     = new Date().toISOString().split('T')[0];
+  const inqId     = 'INQ-' + Date.now();
+
+  const row = {
+    inquiry_id:      inqId,
+    company_name:    company,
+    contact_name:    contact,
+    email:           email,
+    phone:           phone,
+    source:          capturedFrom,
+    captured_from:   capturedFrom,
+    date:            today,
+    product_interest: product,
+    quantity:        quantity,
+    status:          'open',
+    customer_type:   custType,
+    customer_id:     custId || null,
+    estimated_value: estValue,
+    notes:           notes,
+    created_date:    new Date().toISOString(),
+  };
+
+  try {
+    const { error } = await _sb.from('inquiries').insert(row);
+    if (error) throw error;
+
+    // Add to local DB
+    DB.inquiries.unshift({
+      id:              inqId,
+      company:         company,
+      contact:         contact,
+      email:           email,
+      phone:           phone,
+      source:          capturedFrom,
+      captured_from:   capturedFrom,
+      date:            today,
+      product_interest: product,
+      quantity:        quantity,
+      status:          'open',
+      unread:          true,
+      customer_type:   custType,
+      customer_id:     custId || null,
+      estimated_value: estValue,
+      notes:           notes,
+    });
+
+    updateNavBadge('nav-badge-inquiries', DB.inquiries.filter(i => i.unread).length);
+    renderInquiries('all');
+    // Reset active tab to All
+    document.querySelectorAll('#page-inquiries .tab').forEach((t,i) => t.classList.toggle('active', i===0));
+    closeAddInquiryModal();
+    showToast('Inquiry saved successfully', 'success');
+  } catch(e) {
+    console.error('saveInquiry error:', e.message);
+    showToast('Failed to save inquiry: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Inquiry'; }
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  // Quick pipeline funnel
+  const dashFunnel = document.getElementById('dash-pipeline-funnel');
+  if (dashFunnel) {
+    const stages = ['lead','quoted','sam

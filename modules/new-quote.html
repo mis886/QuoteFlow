@@ -1,0 +1,214 @@
+<div class="page" id="page-new-quote">
+        <div class="section-header">
+          <div>
+            <div class="breadcrumb"><a onclick="nav('quotations')">Quotations</a><span class="breadcrumb-sep">›</span><span id="quote-form-mode">New Quotation</span></div>
+            <div class="section-title" id="quote-form-title">Create Quotation</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary" onclick="saveAndSend()">Save</button>
+          </div>
+        </div>
+
+        <!-- Status steps -->
+        <div class="status-steps" style="margin-bottom:20px;">
+          <div class="step active"><div class="step-circle">1</div><div class="step-label">Details</div></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="step-circle">2</div><div class="step-label">Line Items</div></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="step-circle">3</div><div class="step-label">Review</div></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="step-circle">4</div><div class="step-label">Send</div></div>
+        </div>
+
+        <div class="two-col" style="margin-bottom:20px;">
+          <!-- Quote Header -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quote Details</div></div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Quote Number <span class="req">*</span></label>
+                  <input type="text" id="q-number" placeholder="QF-2025-047" value="QF-2025-048">
+                </div>
+                <div class="form-group">
+                  <label>Quote Date <span class="req">*</span></label>
+                  <input type="date" id="q-date">
+                </div>
+                <div class="form-group">
+                  <label>Valid Until</label>
+                  <input type="date" id="q-valid">
+                </div>
+                <div class="form-group">
+                  <label>Inquiry Source</label>
+                  <select id="q-source">
+                    <option value="gmail">Gmail</option>
+                    <option value="indiamart">Indiamart</option>
+                    <option value="manual">Manual / Phone</option>
+                    <option value="referral">Referral</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group" style="margin-top:12px;">
+                <label>Internal Notes</label>
+                <textarea id="q-notes" placeholder="Pricing strategy, special instructions…" style="min-height:60px;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Customer</div>
+              <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="openNewCustomerModal()">+ Add New</button>
+            </div>
+            <div class="card-body">
+              <div class="form-group" style="margin-bottom:12px;">
+                <label>Select Customer <span class="req">*</span></label>
+                <div style="position:relative;">
+                  <input type="text" id="q-customer-input" placeholder="Type to search customer…" oninput="filterCustomerTypeahead()" onfocus="showCustomerDropdown()" onblur="setTimeout(hideCustomerDropdown,200)" autocomplete="off" style="width:100%;padding:8px 12px;border:1px solid var(--gray200);border-radius:8px;font-size:13px;background:var(--bg-white,#fff);color:var(--gray800);box-sizing:border-box;">
+                  <input type="hidden" id="q-customer" value="">
+                  <div id="q-customer-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--bg-white,#fff);border:1px solid var(--gray200);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);max-height:240px;overflow-y:auto;z-index:9999;"></div>
+                </div>
+              </div>
+              <div id="customer-preview" style="display:none;">
+                <div style="background:var(--gray50);border:1px solid var(--gray200);border-radius:8px;padding:12px;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;">
+                    <div><span style="color:var(--gray500);">Contact:</span> <span id="cp-contact" style="font-weight:500;color:var(--gray800);"></span></div>
+                    <div><span style="color:var(--gray500);">GSTIN:</span> <span id="cp-gstin" style="font-family:var(--font-mono);"></span></div>
+                    <div><span style="color:var(--gray500);">Incoterms:</span> <span id="cp-inco" class="badge badge-blue" style="font-size:10px;"></span></div>
+                    <div><span style="color:var(--gray500);">Payment:</span> <span id="cp-pay"></span></div>
+                    <div style="grid-column:1/-1"><span style="color:var(--gray500);">Address:</span> <span id="cp-addr"></span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-grid" style="margin-top:12px;">
+                <div class="form-group">
+                  <label>Override Incoterms</label>
+                  <select id="q-incoterms">
+                    <option value="">Use customer default</option>
+                    <option>EXW</option><option>FOB</option><option>CIF</option><option>CFR</option>
+                    <option>DAP</option><option>DDP</option><option>FCA</option>
+                    <option>Ex Bhiwandi Warehouse</option>
+                    <option>Ex Bhiwandi Warehouse Self Pickup</option>
+                    <option>Ex Factory Warehouse</option>
+                    <option>Delivered</option>
+                    <option>Free Delivery till Transport</option>
+                    <option>Ex-Port</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Currency</label>
+                  <select id="q-currency">
+                    <option>INR</option><option>USD</option><option>EUR</option><option>GBP</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line Items -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header">
+            <div class="card-title">Line Items</div>
+            <div class="card-subtitle">Line items saved to Supabase</div>
+          </div>
+          <div class="card-body" style="padding-bottom:8px;">
+            <div class="table-wrap">
+              <table class="line-table" id="line-items-table">
+                <thead>
+                  <tr>
+                    <th style="width:28px;">#</th>
+                    <th>Product / Description</th>
+                    <th style="width:90px;">HSN Code</th>
+                    <th style="width:80px;">Qty</th>
+                    <th style="width:100px;">Price Basis</th>
+                    <th style="width:100px;">Unit Rate (₹)</th>
+                    <th style="width:80px;">GST %</th>
+                    <th style="width:100px;">Amount (₹)</th>
+                    <th style="width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="line-items-body">
+                </tbody>
+                <tfoot>
+                  <tr class="subtotal-row">
+                    <td colspan="7" style="text-align:right;font-weight:500;color:var(--gray600);font-size:12px;">Subtotal (before tax)</td>
+                    <td id="subtotal-cell" style="font-weight:600;font-family:var(--font-mono);">₹0.00</td>
+                    <td></td>
+                  </tr>
+                  <tr class="subtotal-row">
+                    <td colspan="7" style="text-align:right;font-weight:500;color:var(--gray600);font-size:12px;">GST Total</td>
+                    <td id="gst-cell" style="font-weight:600;font-family:var(--font-mono);">₹0.00</td>
+                    <td></td>
+                  </tr>
+                  <tr class="total-row">
+                    <td colspan="7" style="text-align:right;font-size:13px;">Grand Total</td>
+                    <td id="grand-total-cell" style="font-family:var(--font-mono);">₹0.00</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="add-line-btn" onclick="addLineItem()">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              Add Line Item
+            </div>
+          </div>
+
+          <!-- Charges & Terms -->
+          <div style="border-top:1px solid var(--gray200);padding:16px 22px;">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label>Freight / Logistics (₹)</label>
+                <input type="number" id="q-freight" value="0" oninput="recalcTotals()">
+              </div>
+              <div class="form-group">
+                <label>Insurance (₹)</label>
+                <input type="number" id="q-insurance" value="0" oninput="recalcTotals()">
+                <div class="ins-note">Standard: 0.15% of subtotal before tax · <a href="#" onclick="applyStdInsurance();return false;" style="color:var(--blue);font-size:10px;">Apply 0.15%</a></div>
+              </div>
+              <div class="form-group">
+                <label>Discount (%)</label>
+                <input type="number" id="q-discount" value="0" min="0" max="100" oninput="recalcTotals()">
+              </div>
+            </div>
+            <div class="form-grid" style="margin-top:12px;">
+              <div class="form-group">
+                <label>Payment Terms</label>
+                <select id="q-payment">
+                    <option>3 Days</option>
+                    <option>7 Days</option>
+                    <option>14 Days</option>
+                    <option>30 Days Net</option>
+                    <option>45 Days</option>
+                    <option>60 Days</option>
+                    <option>90 Days</option>
+                    <option>120 Days</option>
+                    <option>50% Advance, 50% on Delivery</option>
+                    <option>100% Advance</option>
+                    <option>LC at Sight</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                <label>Delivery Lead Time</label>
+                <input type="text" id="q-delivery" placeholder="e.g. 7-10 working days">
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:12px;">
+              <label>Terms &amp; Conditions</label>
+              <textarea id="q-terms" style="min-height:60px;">Goods once sold will not be taken back. Prices subject to change without notice. All disputes subject to Mumbai jurisdiction.</textarea>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div style="padding:0 22px 20px;">
+            <div class="summary-box">
+              <div><div class="s-label">Subtotal</div><div class="s-val" id="sum-subtotal">₹0.00</div></div>
+              <div><div class="s-label">GST</div><div class="s-val" id="sum-gst">₹0.00</div></div>
+              <div><div class="s-label">Freight + Insurance</div><div class="s-val" id="sum-charges">₹0.00</div></div>
+              <div><div class="s-label">Grand Total</div><div class="s-val" id="sum-grand" style="font-size:22px;">₹0.00</div></div>
+            </div>
+          </div>
+        </div>
+      </div>

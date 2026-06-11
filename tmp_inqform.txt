@@ -1,0 +1,139 @@
+add-inquiry-modal" style="display:none;" onclick="if(event.target===this)closeAddInquiryModal()">
+        <div class="modal" style="max-width:560px;width:95%;max-height:90vh;overflow-y:auto;">
+          <div class="modal-header">
+            <div class="modal-title">New Inquiry</div>
+            <button class="modal-close" onclick="closeAddInquiryModal()">✕</button>
+          </div>
+          <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+
+            <!-- Company Name with typeahead -->
+            <div>
+              <label class="form-label">Company Name <span style="color:var(--red)">*</span></label>
+              <div style="position:relative;">
+                <input id="inq-company" class="form-input" placeholder="Type to search or add new company…" autocomplete="off"
+                  oninput="filterInquiryCompany(this.value)" onblur="setTimeout(()=>hideInquiryCompanySuggest(),180)">
+                <div id="inq-company-suggest" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--gray200);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:200;max-height:180px;overflow-y:auto;"></div>
+              </div>
+            </div>
+
+            <!-- Customer Type (auto-set) -->
+            <div style="display:flex;gap:10px;align-items:center;">
+              <label class="form-label" style="margin:0;white-space:nowrap;">Customer Type:</label>
+              <span id="inq-customer-type-badge" class="badge badge-gray" style="font-size:12px;padding:4px 10px;">New Customer</span>
+              <input type="hidden" id="inq-customer-type" value="new">
+              <input type="hidden" id="inq-customer-id" value="">
+            </div>
+
+            <!-- Contact + Email -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label class="form-label">Contact Person</label>
+                <input id="inq-contact" class="form-input" placeholder="Full name">
+              </div>
+              <div>
+                <label class="form-label">Email</label>
+                <input id="inq-email" class="form-input" type="email" placeholder="email@company.com">
+              </div>
+            </div>
+
+            <!-- Phone + Captured From -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label class="form-label">Phone Number</label>
+                <input id="inq-phone" class="form-input" placeholder="+91 98765 43210">
+              </div>
+              <div>
+                <label class="form-label">Enquiry Captured From <span style="color:var(--red)">*</span></label>
+                <select id="inq-captured-from" class="form-input">
+                  <option value="">— Select source —</option>
+                  <option value="email">Email</option>
+                  <option value="call">Call</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="indiamart">Indiamart</option>
+                  <option value="notes">Notes</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Product + Quantity -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label class="form-label">Product Inquired <span style="color:var(--red)">*</span></label>
+                <select id="inq-product" class="form-input">
+                  <option value="">— Select product —</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Quantity</label>
+                <input id="inq-quantity" class="form-input" placeholder="e.g. 50 kg, 10 drums">
+              </div>
+            </div>
+
+            <!-- Estimated Value -->
+            <div>
+              <label class="form-label">Estimated Order Value (₹)</label>
+              <input id="inq-est-value" class="form-input" type="number" min="0" placeholder="e.g. 250000">
+            </div>
+
+            <!-- Notes -->
+            <div>
+              <label class="form-label">Notes</label>
+              <textarea id="inq-notes" class="form-input" rows="3" placeholder="Any additional details about this inquiry…" style="resize:vertical;"></textarea>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost btn-sm" onclick="closeAddInquiryModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveInquiry()" id="inq-save-btn">Save Inquiry</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ QUOTATIONS LIST ═══════════ -->
+      <div class="page" id="page-quotations">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Quotations</div>
+            <div class="section-subtitle">All quotes — synced live from Supabase</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="btn btn-secondary btn-sm" id="quote-filter-status">
+              <option value="">All Statuses</option>
+              <option>Draft</option><option>Sent</option><option>Negotiating</option><option>Won</option><option>Lost</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="nav('new-quote')">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Quote
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Quote No.</th><th>Customer</th><th>Items</th><th>Value</th>
+                  <th>Incoterms</th><th>Status</th><th>Date</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="quotes-table-body"></tbody>
+            </table>
+          </div>
+          <div class="card-footer">
+            <span style="font-size:12px;color:var(--gray400);">Showing all 12 quotes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ NEW QUOTATION ═══════════ -->
+      <div class="page" id="page-new-quote">
+        <div class="section-header">
+          <div>
+            <div class="breadcrumb"><a onclick="nav('quotations')">Quotations</a><span class="breadcrumb-sep">›</span><span id="quote-form-mode">New Quotation</span></div>
+            <div class="section-title" id="quote-form-title">Create Quotation</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary" onclick="saveDraft()">Save Draft</button>
+            <button class="btn btn-secondary" onclick="saveAndSend()">
+        

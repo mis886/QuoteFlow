@@ -1,0 +1,86 @@
+loadSamplesFromSupabase(); }
+  window.scrollTo(0,0);
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg, type='') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = (type === 'success' ? '✓  ' : type === 'error' ? '✗  ' : 'ℹ  ') + msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ── MODALS ───────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function toggleSidebar() {
+  const sb = document.getElementById('main-sidebar');
+  if (sb) sb.classList.toggle('collapsed');
+}
+
+// Update a sidebar nav badge — shows count if > 0, hides if zero
+function updateNavBadge(badgeId, count) {
+  const el = document.getElementById(badgeId);
+  if (!el) return;
+  if (count > 0) { el.textContent = count; el.style.display = ''; }
+  else { el.style.display = 'none'; }
+}
+// openNewCustomerModal() — replaced by V3 version below
+
+// ── SAVE CUSTOMER ─────────────────────────────────────────────────────────────
+// saveCustomer() — replaced by V3 version below
+
+// ── RENDER CUSTOMERS ──────────────────────────────────────────────────────────
+
+// renderCustomers() — V3 version defined in V3 NEW FUNCTIONS section
+
+function startQuoteFor(customerId) {
+  nav('new-quote');
+  setTimeout(() => {
+    const c = DB.customers.find(x => x.id === customerId);
+    if (c) {
+      const inputEl  = document.getElementById('q-customer-input');
+      const hiddenEl = document.getElementById('q-customer');
+      if (inputEl)  inputEl.value  = c.company;
+      if (hiddenEl) hiddenEl.value = customerId;
+      fillCustomerDefaults(customerId);
+    }
+  }, 50);
+}
+
+// ── RENDER INQUIRIES ──────────────────────────────────────────────────────────
+function renderInquiries(filter) {
+  const list = document.getElementById('inquiry-list');
+  if (!list) return;
+
+  // Update tab badge counts from real data
+  const setCount = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+  setCount('inq-count-all',      DB.inquiries.length);
+  setCount('inq-count-gmail',    DB.inquiries.filter(i => i.source === 'gmail').length);
+  setCount('inq-count-indiamart',DB.inquiries.filter(i => i.source === 'indiamart').length);
+  setCount('inq-count-manual',   DB.inquiries.filter(i => i.source === 'manual').length);
+
+  const filtered = filter === 'all' ? DB.inquiries : DB.inquiries.filter(i => i.source === filter);
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg></div><div class="empty-title">No inquiries</div><div class="empty-desc">Add inquiries manually or sync from IndiaMART.</div></div>`;
+    return;
+  }
+  const palette = ['#7C3AED','#1A6FDB','#D97706','#0F8A6F','#D85A30'];
+  const capturedLabel = {email:'Email',call:'Call',whatsapp:'WhatsApp',indiamart:'Indiamart',notes:'Notes',gmail:'Gmail',manual:'Manual'};
+  list.innerHTML = filtered.map((inq, idx) => {
+    const company = inq.company || '—';
+    const color = palette[idx % palette.length];
+    const sourceKey = inq.captured_from || inq.source || 'manual';
+    const srcLabel = capturedLabel[sourceKey] || sourceKey;
+    const srcPillClass = sourceKey === 'indiamart' ? 'source-indiamart' : sourceKey === 'gmail' || sourceKey === 'email' ? 'source-gmail' : 'source-manual';
+    const isNewCust = inq.customer_type !== 'existing';
+    const custTypeBadge = !isNewCust
+      ? `<span class="badge badge-teal" style="font-size:10px;">Existing</span>`
+      : `<span class="badge badge-gray" style="font-size:10px;">New Customer</span>`;
+    const estVal = inq.estimated_value ? `<span style="font-size:12px;font-weight:600;color:var(--gray700);">₹${(inq.estimated_value/100000).toFixed(2)}L</span>` : '';
+    const isConverted = inq.status === 'converted';
+    return `
+    <div class="inquiry-card${inq.unread?' unread':''}" style="${isConverted?'opacity:.7;':''}

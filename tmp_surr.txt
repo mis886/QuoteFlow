@@ -1,0 +1,1 @@
+"function openAddInquiryModal() {\r\n  // Reset form\r\n  ['inq-company','inq-contact','inq-email','inq-phone','inq-quantity','inq-notes'].forEach(id => {\r\n    const el = document.getElementById(id); if (el) el.value = '';\r\n  });\r\n  const estEl = document.getElementById('inq-est-value'); if (estEl) estEl"

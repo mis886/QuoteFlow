@@ -1,0 +1,76 @@
+async function saveFollowup() {
+  const leadId = currentFollowupLeadId;
+  let lead = DB.leads.find(l => l.id === leadId);
+  if (!lead) {
+    const inq = (DB.inquiries||[]).find(i => i.id === leadId);
+    if (inq) lead = { id: inq.id, company: inq.company, followupCount: (DB.followups[leadId]||[]).length, lastFollowup: inq.date||null, created: inq.created||null };
+    const samp = !lead && (DB.samples||[]).find(s => s.id === leadId);
+    if (samp) lead = { id: samp.id, company: samp.customer, followupCount: (DB.followups[leadId]||[]).length, lastFollowup: samp.sentDate||null, created: samp.sentDate||null };
+  }
+  if (!lead) return;
+
+  const notes = document.getElementById('fu-notes')?.value?.trim();
+  const fuDate = document.getElementById('fu-date')?.value;
+  if (!notes || !fuDate) { showToast('Notes and next follow-up date are required', 'error'); return; }
+
+  if (lead.followupCount >= 7) {
+    showToast('Maximum 7 follow-ups reached. Please close or escalate this lead.', 'error');
+    return;
+  }
+
+  // Validate max 7 days from last followup
+  const lastDate = lead.lastFollowup ? new Date(lead.lastFollowup) : new Date(lead.created);
+  const nextDate = new Date(fuDate);
+  const diffDays = Math.floor((nextDate - lastDate) / 86400000);
+  if (diffDays > 7 && DB.leads.find(l => l.id === leadId)) {
+    showToast('Follow-up must be within 7 days of the last contact.', 'error');
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const fuType    = document.getElementById('fu-type')?.value || '';
+  const fuOutcome = document.getElementById('fu-outcome')?.value || '';
+  const stageUpdate = document.getElementById('fu-stage')?.value;
+  const userName  = window._currentUser?.name || 'Sales Team';
+
+  const fuRecord = {
+    date:              today,
+    type:              fuType,
+    notes,
+    outcome:           fuOutcome,
+    by:                userName,
+    next_followup_date: fuDate,
+  };
+
+  // Save to Supabase — existing followups table
+  try {
+    const { error } = await _sb.from('followups').insert({
+      lead_id:            leadId,
+      date:               today,
+      type:               fuType,
+      notes,
+      outcome:            fuOutcome,
+      next_followup_date: fuDate,
+      stage_update:       stageUpdate || null,
+      logged_by:          userName,
+    });
+    if (error) throw error;
+  } catch(e) {
+    console.warn('saveFollowup Supabase error:', e.message);
+    showToast('Saved locally (Supabase sync failed)', 'warning');
+  }
+
+  // Update in-memory state
+  if (!DB.followups[leadId]) DB.followups[leadId] = [];
+  DB.followups[leadId].push(fuRecord);
+
+  lead.followupCount++;
+  lead.lastFollowup = today;
+  lead.nextFollowup = fuDate;
+  // If stage was changed via followup form, persist it to Supabase
+  if (stageUpdate) await updateLeadStage(leadId, stageUpdate);
+
+  closeModal('followup-modal');
+  renderPipeline();
+  showToast(`Follow-up #${lead.followupCount} logged for ${lead.company}`, 'success');
+}

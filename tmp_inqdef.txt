@@ -1,0 +1,49 @@
+async function loadInquiriesFromSupabase() {
+  try {
+    const { data, error } = await _sb.from('inquiries').select('*').order('created_date', { ascending: false });
+    if (error) throw error;
+    DB.inquiries = (data || []).map(r => ({
+      id:               r.inquiry_id,
+      company:          r.company_name || '—',
+      contact:          r.contact_name || '',
+      email:            r.email        || '',
+      phone:            r.phone        || '',
+      subject:          r.subject      || '',
+      source:           r.source       || 'manual',
+      captured_from:    r.captured_from || r.source || 'manual',
+      date:             r.date         || '',
+      product_interest: r.product_interest || '',
+      quantity:         r.quantity     || '',
+      status:           r.status       || 'open',
+      unread:           r.status === 'open',
+      customer_type:    r.customer_type || 'new',
+      customer_id:      r.customer_id  || null,
+      estimated_value:  r.estimated_value ? parseFloat(r.estimated_value) : null,
+      notes:            r.notes        || '',
+    }));
+    // Update tab counts immediately if page is open
+    const setCount = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    setCount('inq-count-all',      DB.inquiries.length);
+    setCount('inq-count-gmail',    DB.inquiries.filter(i => i.source === 'gmail').length);
+    setCount('inq-count-indiamart',DB.inquiries.filter(i => i.source === 'indiamart').length);
+    setCount('inq-count-manual',   DB.inquiries.filter(i => i.source === 'manual').length);
+    updateNavBadge('nav-badge-inquiries', DB.inquiries.filter(i => i.unread).length);
+    if (document.getElementById('inquiry-list')) renderInquiries('all');
+  } catch(e) {
+    console.warn('loadInquiriesFromSupabase:', e.message);
+  }
+}
+
+async function loadSamplesFromSupabase() {
+  try {
+    const { data, error } = await _sb.from('samples').select('*').order('sent_date', { ascending: false });
+    if (error) throw error;
+    DB.samples = (data || []).map(r => ({
+      id:          r.sample_id,
+      customer:    DB.customers.find(c => c.id === r.customer_id)?.company || r.customer_id || '—',
+      customerId:  r.customer_id,
+      leadId:      r.lead_id,
+      product:     r.product_name || r.product_code || '—',
+      qty:         r.quantity ? `${r.quantity} ${r.unit || ''}`.trim() : '—',
+      sentDate:    r.sent_date || '',
+      status:      r.

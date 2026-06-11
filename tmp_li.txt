@@ -1,0 +1,75 @@
+────────────────────────────────────────────────
+function addLineItem() {
+  lineCounter++;
+  const id = 'line_' + lineCounter;
+  currentLines.push({id});
+  const tbody = document.getElementById('line-items-body');
+  if (!tbody) return;
+  const row = document.createElement('tr');
+  row.id = id;
+  row.innerHTML = `
+    <td style="text-align:center;color:var(--gray400);font-size:12px;">${currentLines.length}</td>
+    <td style="position:relative;">
+      <input type="text" class="li-product" placeholder="Product name / description" style="min-width:200px;"
+        oninput="filterProductSuggest(this,'${id}')" onblur="setTimeout(()=>hideProductSuggest('${id}'),180)" autocomplete="off"/>
+      <div id="ps_${id}" style="display:none;position:absolute;top:100%;left:0;z-index:999;background:#fff;border:1px solid var(--gray200);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:280px;max-height:200px;overflow-y:auto;"></div>
+    </td>
+    <td><input type="text" class="li-hsn" placeholder="e.g. 38051000" style="font-family:var(--font-mono);font-size:12px;" oninput="recalcTotals()"/></td>
+    <td><input type="number" class="li-qty" placeholder="0" min="0" step="0.01" oninput="recalcTotals()"/></td>
+    <td>
+      <select class="li-basis" oninput="recalcTotals()">
+        <option>Per kg</option><option>Per MT</option><option>Per Ltr</option><option>Per KL</option><option>Per Unit</option><option>Per Drum</option><option>Per Can</option>
+      </select>
+    </td>
+    <td><input type="number" class="li-rate" placeholder="0.00" min="0" step="0.01" oninput="recalcTotals()"/></td>
+    <td>
+      <select class="li-gst" oninput="recalcTotals()">
+        <option value="18">18%</option><option value="12">12%</option><option value="5">5%</option><option value="28">28%</option><option value="0">0%</option>
+      </select>
+    </td>
+    <td id="amt_${id}" style="font-family:var(--font-mono);font-weight:600;font-size:12px;color:var(--gray700);">₹0.00</td>
+    <td>
+      <div class="btn-icon" onclick="removeLineItem('${id}')">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </div>
+    </td>
+  `;
+  tbody.appendChild(row);
+  recalcTotals();
+}
+
+function filterProductSuggest(input, rowId) {
+  recalcTotals();
+  const q = input.value.trim().toLowerCase();
+  const dd = document.getElementById('ps_' + rowId);
+  if (!dd) return;
+  if (!q || !DB.products?.length) { dd.style.display = 'none'; return; }
+  const matches = DB.products.filter(p => p.name.toLowerCase().includes(q) || p.hsn.includes(q)).slice(0, 8);
+  if (!matches.length) { dd.style.display = 'none'; return; }
+  dd.style.display = 'block';
+  dd.innerHTML = matches.map(p => `
+    <div style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--gray100);"
+      onmousedown="selectProduct('${rowId}',${JSON.stringify(p.name).replace(/'/g,"\\'")},'${p.hsn}',${p.rate},'${p.unit}',${p.gst})"
+      style="padding:8px 12px;cursor:pointer;font-size:12px;">
+      <div style="font-weight:600;color:var(--gray900);">${p.name}</div>
+      <div style="color:var(--gray400);font-size:11px;">HSN: ${p.hsn} · ₹${p.rate}/${p.unit} · GST ${p.gst}%</div>
+    </div>`).join('');
+}
+
+function hideProductSuggest(rowId) {
+  const dd = document.getElementById('ps_' + rowId);
+  if (dd) dd.style.display = 'none';
+}
+
+function selectProduct(rowId, name, hsn, rate, unit, gst) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  const productInput = row.querySelector('.li-product');
+  const hsnInput     = row.querySelector('.li-hsn');
+  const rateInput    = row.querySelector('.li-rate');
+  const basisSel     = row.querySelector('.li-basis');
+  const gstSel       = row.querySelector('.li-gst');
+  if (productInput) productInput.value = name;
+  if (hsnInput)     hsnInput.value     = hsn;
+  if (rateInput)    rateInput.value    = rate;
+  if (basisSel)     { for (const o of basisSe

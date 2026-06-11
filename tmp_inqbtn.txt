@@ -1,0 +1,16 @@
+const inqCards = inqToShow.map((inq, idx) => {
+    const color = palette[idx % palette.length];
+    const company = inq.company || '—';
+    const sourceKey = inq.captured_from || inq.source || 'manual';
+    const srcLabel = {email:'Email',call:'Call',whatsapp:'WhatsApp',indiamart:'Indiamart',notes:'Notes',gmail:'Gmail',manual:'Manual'}[sourceKey] || sourceKey;
+    const srcPillClass = sourceKey === 'indiamart' ? 'source-indiamart' : (sourceKey === 'gmail' || sourceKey === 'email') ? 'source-gmail' : 'source-manual';
+    const custTypeBadge = inq.customer_type !== 'existing'
+      ? `<span class="badge badge-gray" style="font-size:10px;">New Customer</span>`
+      : `<span class="badge badge-teal" style="font-size:10px;">Existing</span>`;
+    const estVal = inq.estimated_value || 0;
+    const product = inq.product_interest || '';
+    const qty = inq.quantity || '';
+    const dateStr = inq.created ? new Date(inq.created).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
+    return `
+      <div class="lead-card on-track" style="cursor:pointer;" onclick="nav('inquiries')">
+        <div class="lc-avatar" style="background:${color};">${company.slice(0,2).toU

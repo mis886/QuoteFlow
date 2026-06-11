@@ -1,0 +1,8 @@
+upabase(); }
+  if (page === 'pipeline') { renderPipeline(); loadLeadsFromSupabase(); loadFollowupsFromSupabase(); }
+  if (page === 'sampling') { renderSampling(); loadSamplesFromSupabase(); }
+  window.scrollTo(0,0);
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function show

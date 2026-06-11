@@ -1,0 +1,42 @@
+function renderPipeline() {
+  const filterStage = document.getElementById('pipeline-filter-stage')?.value || '';
+  const filtered = filterStage ? DB.leads.filter(l => l.stage === filterStage) : DB.leads;
+
+  // Active inquiries (not converted/closed) → Lead stage
+  const activeInquiries = (DB.inquiries || []).filter(i => i.status !== 'converted' && i.status !== 'closed');
+  // All samples → Sampling stage
+  const activeSamples = (DB.samples || []);
+
+  // Funnel KPI
+  const funnel = document.getElementById('pipeline-funnel');
+  if (funnel) {
+    const stages = ['lead','quoted','sampling','negotiating','won','lost'];
+    funnel.innerHTML = stages.map(s => {
+      const items = DB.leads.filter(l => l.stage === s);
+      let count = items.length;
+      let val = items.reduce((a,b) => a + b.value, 0);
+      if (s === 'lead') {
+        count += activeInquiries.length;
+        val += activeInquiries.reduce((a,i) => a + (i.estimated_value || 0), 0);
+      }
+      if (s === 'sampling') {
+        count += activeSamples.length;
+      }
+      const isActive = filterStage === s;
+      return `
+        <div class="jp-stage${isActive?' active-stage':''}" onclick="setStageFilter('${s}')">
+          <div class="jp-label">${STAGE_CONFIG[s].label}</div>
+          <div class="jp-count">${count}</div>
+          <div class="jp-val">${val > 0 ? '₹'+( val/100000).toFixed(1)+'L' : '—'}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // Followup alerts
+  const alertEl = document.getElementById('followup-alerts');
+  if (alertEl) {
+    const followupStages = ['lead', 'quoted'];
+    const overdue = DB.leads.filter(l => l.nextFollowup && daysUntil(l.nextFollowup) < 0 && followupStages.includes(l.stage));
+    const dueToday = DB.leads.filter(l => l.nextFollowup && daysUntil(l.nextFollowup) === 0 && followupStages.includes(l.stage));
+    const alerts = [];
+    if (overdue.length) alerts.push(`<div style="background:var(--red-light);border:1px solid rgba(220,3

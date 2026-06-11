@@ -1,0 +1,155 @@
+<div class="page active" id="page-dashboard">
+        <div class="section-header">
+          <div>
+            <div class="breadcrumb"><span>QuoteFlow Pro</span><span class="breadcrumb-sep">›</span><span>Dashboard</span></div>
+            <!--<div class="section-title">Overview</div>-->
+            <div class="section-subtitle">Last 30 days · Updated just now</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <select class="btn btn-secondary btn-sm" style="cursor:pointer;">
+              <option>Last 30 days</option><option>This quarter</option><option>This year</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-label">Total Quotes Sent</div>
+            <div class="stat-value" id="kpi-quotes-count">47</div>
+            <div class="stat-change up" id="kpi-quotes-badge">↑ 12% vs last month</div>
+            <div class="stat-icon blue"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"></path></svg></div>
+          </div>
+          <div class="stat-card teal">
+            <div class="stat-label">Quote Value</div>
+            <div class="stat-value" id="kpi-value-amount">₹84.6L</div>
+            <div class="stat-change up" id="kpi-value-badge">↑ 8% vs last month</div>
+            <div class="stat-icon teal"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path></svg></div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-label">Win Rate</div>
+            <div class="stat-value" id="kpi-win-rate">34%</div>
+            <div class="stat-change down" id="kpi-win-badge">↓ 2% vs last month</div>
+            <div class="stat-icon amber"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-label">Active Customers</div>
+            <div class="stat-value" id="kpi-active-count">23</div>
+            <div class="stat-change up">↑ 4 new this month</div>
+            <div class="stat-icon purple"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87"></path></svg></div>
+          </div>
+        </div>
+
+        <!-- Pipeline -->
+        <!-- Quick pipeline funnel on dashboard -->
+        <div id="dash-pipeline-funnel" class="journey-pipeline" style="cursor:default;"><div class="jp-stage" onclick="nav('pipeline');setTimeout(()=&gt;setStageFilter('lead'),80)">
+        <div class="jp-label">Lead</div>
+        <div class="jp-count">0</div>
+        <div class="jp-val">—</div>
+      </div><div class="jp-stage" onclick="nav('pipeline');setTimeout(()=&gt;setStageFilter('quoted'),80)">
+        <div class="jp-label">Quoted</div>
+        <div class="jp-count">0</div>
+        <div class="jp-val">—</div>
+      </div><div class="jp-stage" onclick="nav('pipeline');setTimeout(()=&gt;setStageFilter('sampling'),80)">
+        <div class="jp-label">Sampling</div>
+        <div class="jp-count">0</div>
+        <div class="jp-val">—</div>
+      </div><div class="jp-stage" onclick="nav('pipeline');setTimeout(()=&gt;setStageFilter('negotiating'),80)">
+        <div class="jp-label">Negotiating</div>
+        <div class="jp-count">0</div>
+        <div class="jp-val">—</div>
+      </div><div class="jp-stage" onclick="nav('pipeline');setTimeout(()=&gt;setStageFilter('won'),80)">
+        <div class="jp-label">Won</div>
+        <div class="jp-count">0</div>
+        <div class="jp-val">—</div>
+      </div><div class="jp-stage" onclick="nav('pipeline');setTimeout(()=&gt;setStageFilter('lost'),80)">
+        <div class="jp-label">Lost</div>
+        <div class="jp-count">0</div>
+        <div class="jp-val">—</div>
+      </div></div>
+
+        <div class="two-col-wide" style="gap:20px;margin-bottom:20px;">
+          <!-- Recent Quotes -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Recent Quotations</div>
+                <div class="card-subtitle">Latest 5 quotes across all stages</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="nav('quotations')">View all →</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Quote No.</th><th>Customer</th><th>Value</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody id="recent-quotes-body">
+      <tr>
+        <td class="td-mono td-bold">QF-2026-002</td>
+        <td>RAJSHA CHEMICALS PVT LTD</td>
+        <td class="td-mono">₹122.52L</td>
+        <td><span class="badge badge-blue">Sent</span></td>
+        <td style="color:var(--gray400);font-size:12px;">2026-05-14</td>
+      </tr>
+    </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Enquiry source breakdown -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Enquiry Sources</div>
+            </div>
+            <div class="card-body">
+              <div class="donut-wrap">
+                <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#e2e8f0" stroke-width="14"></circle>
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#1A6FDB" stroke-width="14" stroke-dasharray="91 148" stroke-dashoffset="-24" style="transition:stroke-dasharray .6s ease"></circle>
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#D97706" stroke-width="14" stroke-dasharray="62 177" stroke-dashoffset="-115" style="transition:stroke-dasharray .6s ease;"></circle>
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#64748B" stroke-width="14" stroke-dasharray="85 154" stroke-dashoffset="-177"></circle>
+                  <text x="50" y="54" text-anchor="middle" font-size="14" font-weight="600" fill="#0F172A" font-family="'DM Sans',sans-serif">47</text>
+                </svg>
+                <div class="donut-legend">
+                  <div class="donut-item"><div class="donut-dot" style="background:#1A6FDB"></div><span class="donut-label">Gmail</span><span class="donut-pct">38%</span></div>
+                  <div class="donut-item"><div class="donut-dot" style="background:#D97706"></div><span class="donut-label">Indiamart</span><span class="donut-pct">26%</span></div>
+                  <div class="donut-item"><div class="donut-dot" style="background:#64748B"></div><span class="donut-label">Manual</span><span class="donut-pct">36%</span></div>
+                </div>
+              </div>
+              <hr class="divider">
+              <div class="chart-bar-wrap">
+                <div class="chart-bar-row">
+                  <div class="chart-bar-label">Reliance Chem</div>
+                  <div class="chart-bar-track"><div class="chart-bar-fill" style="width:78%;background:var(--blue)"></div></div>
+                  <div class="chart-bar-val">₹18.4L</div>
+                </div>
+                <div class="chart-bar-row">
+                  <div class="chart-bar-label">Tata Chem</div>
+                  <div class="chart-bar-track"><div class="chart-bar-fill" style="width:55%;background:var(--teal)"></div></div>
+                  <div class="chart-bar-val">₹12.2L</div>
+                </div>
+                <div class="chart-bar-row">
+                  <div class="chart-bar-label">UPL Ltd</div>
+                  <div class="chart-bar-track"><div class="chart-bar-fill" style="width:40%;background:var(--purple)"></div></div>
+                  <div class="chart-bar-val">₹8.9L</div>
+                </div>
+                <div class="chart-bar-row">
+                  <div class="chart-bar-label">Aarti Ind.</div>
+                  <div class="chart-bar-track"><div class="chart-bar-fill" style="width:30%;background:var(--amber)"></div></div>
+                  <div class="chart-bar-val">₹6.7L</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity feed / Recent inquiries -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Pending Inquiries</div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <span class="badge badge-blue">5 unread</span>
+              <button class="btn btn-ghost btn-sm" onclick="nav('inquiries')">View all →</button>
+            </div>
+          </div>
+          <div class="card-body" id="dashboard-inquiries"><div style="text-align:center;color:var(--gray400);padding:24px;font-size:13px;">All inquiries handled ✓</div></div>
+        </div>
+      </div>

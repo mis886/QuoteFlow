@@ -1,0 +1,21 @@
+MODAL_START: [class="modal-overlay" id="add-inquiry-modal" style="display:]
+---
+MODAL_END: [    </div>
+
+      <!-- ═══════════ QUOTATIONS LI]
+---
+OPENFN_START: [function openAddInquiryModal() {
+  // Reset form
+  ['inq-c]
+---
+OPENFN_END: [}
+
+function closeAddInquiryModal() {
+  doc]
+---
+SAVEFN_START: [async function saveInquiry() {
+  const company      = docum]
+---
+SAVEFN_END: [────
+function renderDashboard() {
+  // Quic]

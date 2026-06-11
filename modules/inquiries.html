@@ -1,0 +1,23 @@
+<div class="page" id="page-inquiries">
+        <div class="section-header">
+          <!--<div>-->
+          <!--  <div class="section-title">Inquiry Hub</div>-->
+          <!--</div>-->
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary btn-sm" onclick="openAddInquiryModal()">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add Inquiry
+            </button>
+            
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="filterInquiries('all',this)">All <span class="badge badge-gray" style="margin-left:4px" id="inq-count-all">—</span></div>
+          <div class="tab" onclick="filterInquiries('gmail',this)">Gmail <span class="badge badge-blue" style="margin-left:4px" id="inq-count-gmail">—</span></div>
+          <div class="tab" onclick="filterInquiries('indiamart',this)">Indiamart <span class="badge badge-amber" style="margin-left:4px" id="inq-count-indiamart">—</span></div>
+          <div class="tab" onclick="filterInquiries('manual',this)">Manual <span class="badge badge-gray" style="margin-left:4px" id="inq-count-manual">—</span></div>
+        </div>
+
+        <div id="inquiry-list"></div>
+      </div>

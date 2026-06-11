@@ -1,0 +1,58 @@
+function renderInquiries(filter) {
+  const list = document.getElementById('inquiry-list');
+  if (!list) return;
+
+  // Update tab badge counts from real data
+  const setCount = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+  setCount('inq-count-all',      DB.inquiries.length);
+  setCount('inq-count-gmail',    DB.inquiries.filter(i => i.source === 'gmail').length);
+  setCount('inq-count-indiamart',DB.inquiries.filter(i => i.source === 'indiamart').length);
+  setCount('inq-count-manual',   DB.inquiries.filter(i => i.source === 'manual').length);
+
+  const filtered = filter === 'all' ? DB.inquiries : DB.inquiries.filter(i => i.source === filter);
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg></div><div class="empty-title">No inquiries</div><div class="empty-desc">Add inquiries manually or sync from IndiaMART.</div></div>`;
+    return;
+  }
+  const palette = ['#7C3AED','#1A6FDB','#D97706','#0F8A6F','#D85A30'];
+  const capturedLabel = {email:'Email',call:'Call',whatsapp:'WhatsApp',indiamart:'Indiamart',notes:'Notes',gmail:'Gmail',manual:'Manual'};
+  list.innerHTML = filtered.map((inq, idx) => {
+    const company = inq.company || '—';
+    const color = palette[idx % palette.length];
+    const sourceKey = inq.captured_from || inq.source || 'manual';
+    const srcLabel = capturedLabel[sourceKey] || sourceKey;
+    const srcPillClass = sourceKey === 'indiamart' ? 'source-indiamart' : sourceKey === 'gmail' || sourceKey === 'email' ? 'source-gmail' : 'source-manual';
+    const isNewCust = inq.customer_type !== 'existing';
+    const custTypeBadge = !isNewCust
+      ? `<span class="badge badge-teal" style="font-size:10px;">Existing</span>`
+      : `<span class="badge badge-gray" style="font-size:10px;">New Customer</span>`;
+    const estVal = inq.estimated_value ? `<span style="font-size:12px;font-weight:600;color:var(--gray700);">₹${(inq.estimated_value/100000).toFixed(2)}L</span>` : '';
+    const isConverted = inq.status === 'converted';
+    return `
+    <div class="inquiry-card${inq.unread?' unread':''}" style="${isConverted?'opacity:.7;':''}">
+      <div class="inq-avatar" style="background:${color};">${company.slice(0,2).toUpperCase()}</div>
+      <div class="inq-content">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="inq-name">${company}</span>
+          ${custTypeBadge}
+          ${inq.unread ? '<span class="badge badge-blue" style="font-size:10px;padding:1px 6px;">New</span>' : ''}
+          <span class="source-pill ${srcPillClass}" style="margin-left:auto;">${srcLabel}</span>
+        </div>
+        <div class="inq-subject">${inq.product_interest || inq.subject || '—'}</div>
+        <div style="font-size:12px;color:var(--gray500);margin-top:2px;">${inq.contact ? '👤 '+inq.contact : ''}${inq.phone ? '&nbsp; 📞 '+inq.phone : ''}${inq.email ? '&nbsp; ✉ '+inq.email : ''}</div>
+        <div class="inq-meta" style="margin-top:8px;">
+          ${inq.product_interest ? `<span class="tag">${inq.product_interest}</span>` : ''}
+          ${inq.quantity ? `<span class="tag">${inq.quantity}</span>` : ''}
+          ${estVal}
+          <span class="inq-time">${inq.date || ''}</span>
+          <span class="badge ${isConverted?'badge-teal':inq.status==='open'?'badge-blue':'badge-gray'}" style="font-size:10px;">${isConverted?'Converted':inq.status||'open'}</span>
+          ${!isConverted
+            ? `<button class="btn btn-primary btn-sm" style="margin-left:auto;font-size:12px;" onclick="event.stopPropagation();openInquiryQuote('${inq.id}')">Create Quote →</button>`
+            : `<span style="margin-left:auto;font-size:11px;color:var(--teal);">✓ Quote created</span>`}
+        </div>
+        ${isNewCust ? `<div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding:6px 10px;background:var(--amber-light);border:1px solid rgba(217,119,6,.25);border-radius:6px;font-size:11px;color:var(--amber);font-weight:500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Add details in Customer DB &nbsp;<button class="btn btn-sm" style="font-size:10px;padding:2px 8px;background:var(--amber);color:#fff;border:none;border-radius:4px;cursor:pointer;" onclick="event.stopPropagation();nav('customers');showToast('Add ${inq.company} to the customer database','info')">Go to Customers →</button></div>` : ''}
+        ${inq.notes ? `<div style="font-size:11px;color:var(--gray500);margin-top:6px;padding-top:6px;border-top:1px solid var(--gray100);">📝 ${inq.notes}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}

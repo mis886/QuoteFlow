@@ -1,0 +1,105 @@
+ badge-${lead.stage==='won'?'teal':lead.stage==='lost'?'red':lead.stage==='quoted'?'blue':lead.stage==='sampling'?'purple':lead.stage==='negotiating'?'amber':'gray'}">${STAGE_CONFIG[lead.stage]?.label||lead.stage}</span>
+            ${['lead','quoted'].includes(lead.stage) ? `<span style="font-size:11px;color:var(--gray400);">Follow-up #${lead.followupCount} · ${followupsLeft > 0 ? followupsLeft+' left' : '⚠ Max reached'}</span>` : ''}
+            ${['lead','quoted'].includes(lead.stage) ? `<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();openFollowupModal('${lead.id}')">+ Follow-up</button>` : ''}
+            ${lead.stage === 'lead' ? `<button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();convertToQuote('${lead.id}')">→ Quote</button>` : ''}
+            <div class="stage-changer-wrap" style="position:relative;display:inline-block;">
+              <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray200);" onclick="event.stopPropagation();toggleStageDropdown('sdrop_${lead.id}')">⋯ Status</button>
+              <div id="sdrop_${lead.id}" class="stage-dropdown" style="display:none;position:absolute;bottom:calc(100% + 4px);left:0;background:var(--white);border:1px solid var(--gray200);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:140px;padding:4px 0;">
+                ${Object.entries(STAGE_CONFIG).map(([s,cfg]) => `
+                  <div class="stage-drop-item${lead.stage===s?' active':''}" style="padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:${lead.stage===s?'var(--primary)':'var(--gray700)'};background:${lead.stage===s?'var(--primary-light)':'transparent'};"
+                    onclick="event.stopPropagation();toggleStageDropdown('sdrop_${lead.id}');changeLeadStageFromCard('${lead.id}','${s}')">
+                    <span class="badge badge-${s==='won'?'teal':s==='lost'?'red':s==='quoted'?'blue':s==='sampling'?'purple':s==='negotiating'?'amber':'gray'}" style="font-size:10px;">${cfg.label}</span>
+                    ${lead.stage===s?'✓':''}
+                  </div>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-right">
+          <div class="lc-value">₹${(lead.value/100000).toFixed(2)}L</div>
+          <span class="lc-followup ${fupClass}">${fupLabel}</span>
+          <div style="font-size:10px;color:var(--gray400);">${daysSinceLast !== null ? `Last: ${daysSinceLast}d ago` : ''}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function setStageFilter(s) {
+  const sel = document.getElementById('pipeline-filter-stage');
+  if (sel) { sel.value = (sel.value === s ? '' : s); }
+  renderPipeline();
+}
+
+// ── CENTRAL STAGE UPDATE — saves to Supabase ─────────────────────────────────
+const STAGE_TO_STATUS = {
+  lead: 'Draft', quoted: 'Sent', sampling: 'Sampling',
+  negotiating: 'Negotiating', won: 'Accepted', lost: 'Rejected'
+};
+
+async function updateLeadStage(leadId, newStage) {
+  const lead = DB.leads.find(l => l.id === leadId);
+  if (!lead) return;
+  lead.stage = newStage;
+  if (newStage === 'won' || newStage === 'lost') lead.nextFollowup = null;
+
+  const newStatus = STAGE_TO_STATUS[newStage];
+
+  // Save to Supabase — quote-derived leads update quotes table; manual leads update leads table
+  try {
+    if (lead.quoteId) {
+      const { error } = await _sb.from('quotes')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('quote_id', lead.quoteId);
+      if (error) throw error;
+    } else {
+      const { error } = await _sb.from('leads')
+        .update({ stage: newStage, modified_date: new Date().toISOString() })
+        .eq('lead_id', leadId);
+      if (error) throw error;
+    }
+  } catch(e) {
+    console.warn('updateLeadStage Supabase error:', e.message);
+    showToast('Stage updated locally (sync failed)', 'warning');
+  }
+
+  renderPipeline();
+}
+
+// ── STAGE DROPDOWN HELPERS ─────────────────────────────────────────────────────
+function toggleStageDropdown(dropId) {
+  // Close any other open stage dropdowns first
+  document.querySelectorAll('.stage-dropdown').forEach(el => {
+    if (el.id !== dropId) el.style.display = 'none';
+  });
+  const el = document.getElementById(dropId);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Close on next outside click
+    setTimeout(() => {
+      function outsideClick(e) {
+        if (!el.contains(e.target)) {
+          el.style.display = 'none';
+          document.removeEventListener('click', outsideClick, true);
+        }
+      }
+      document.addEventListener('click', outsideClick, true);
+    }, 0);
+  }
+}
+
+async function changeLeadStageFromCard(leadId, newStage) {
+  const lead = DB.leads.find(l => l.id === leadId);
+  if (!lead) return;
+  if (lead.stage === newStage) return; // no change
+  // If moving to 'quoted' from 'lead' and lead has no quoteId, open the new quote flow
+  if (newStage === 'quoted' && lead.stage === 'lead' && !lead.quoteId) {
+    convertToQuote(leadId);
+    return;
+  }
+  await updateLeadStage(leadId, newStage);
+  showToast(`Status changed to ${STAGE_CONFIG[newStage]?.label || newStage}`, 'success');
+}
+
+function co

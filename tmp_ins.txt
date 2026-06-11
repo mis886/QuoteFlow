@@ -1,0 +1,11 @@
+const { error } = await _sb.from('followups').insert({
+      lead_id:            leadId,
+      date:               today,
+      type:               fuType,
+      notes,
+      outcome:            fuOutcome,
+      next_followup_date: fuDate,
+      stage_update:       stageUpdate || null,
+      logged_by:          userName,
+    });
+    if (

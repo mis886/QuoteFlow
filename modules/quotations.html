@@ -1,0 +1,89 @@
+<div class="page" id="page-quotations">
+
+  <div class="section-header">
+    <div>
+      <div class="section-subtitle">
+        All quotes — synced live from Supabase
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;">
+
+      <select class="btn btn-secondary btn-sm"
+              id="quote-filter-status"
+              onchange="filterQuotes()">
+
+        <option value="">All Statuses</option>
+        <option value="Draft">Draft</option>
+        <option value="Sent">Sent</option>
+        <option value="Negotiating">Negotiating</option>
+        <option value="Won">Won</option>
+        <option value="Lost">Lost</option>
+
+      </select>
+
+      <button class="btn btn-primary btn-sm"
+              onclick="nav('new-quote')">
+
+        <svg viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+
+        New Quote
+
+      </button>
+
+    </div>
+  </div>
+
+  <div class="card">
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Quote No.</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Value</th>
+            <th>Incoterms</th>
+            
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="quotes-table-body">
+
+          <tr>
+            <td colspan="8"
+                style="padding:30px;text-align:center;color:var(--gray400);">
+
+              Loading quotations...
+
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div class="card-footer">
+
+      <span id="quotes-count"
+            style="font-size:12px;color:var(--gray400);">
+
+        Loading...
+
+      </span>
+
+    </div>
+
+  </div>
+
+</div>

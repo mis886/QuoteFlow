@@ -1,0 +1,1 @@
+"loadInquiriesFromSupabase(); }\r\n  if (page === 'pipeline') { renderPipeline(); loadLeadsFromSupabase(); loadFollowupsFromSupabase(); loadInquiriesFromSupabase().then(() => renderPipeline()); loadSamplesFromSupabase(); setTimeout(() => { if(document.getElementById('pipeline-deals-list')) renderPipeli"

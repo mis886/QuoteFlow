@@ -1,0 +1,42 @@
+NAV:
+page === 'new-quote') initNewQuote();
+  if (page === 'customers') { renderCustomers(); loadCustomersFromSupabase(); }
+  if (page === 'reports') renderReports();
+  if (page === 'inquiries') { renderInquiries('all'); loadInquiriesFromSupabase(); }
+  if (page === 'pipeline')
+
+PROD_LOAD:
+function loadProductsFromSupabase() {
+  try {
+    const { data, error } = await _sb.from('products').select('*').eq('status', 'active').order('product_name');
+    if (error) throw error;
+    DB.products = (data || []).map(r => ({
+      id:   r.product_id,
+      name: r.product_name,
+      hsn:  r.hsn_code    || '',
+      gst:  parseFloat(r.gst_percent) || 18,
+      unit: r.unit        || 'Kg',
+      rate: parseFloat(r.default_rate) || 0,
+      cat:  r.category    || '',
+    }));
+  } catch(e) {
+    console.warn('loadProductsFromSupabase:', e.message);
+  }
+}
+
+async function loadInquiriesFromSupabase() {
+  try {
+    const { data, error } = await _sb.from('inquiries').select('*').order('created_date', { ascending: false });
+    if (error) throw error;
+    DB.inquiries = (data || []).map(r => ({
+      id:               r.inquiry_id,
+      company:          r.company_name || '—',
+      contact:          r.contact_name || '',
+      email:            r.email        || '',
+      phone:            r.phone        || '',
+      subject:          r.subject      || '',
+      source:           r.source       || 'manual',
+      captured_from:    r.captured_from || r.source || 'manual',
+      date:             r.date         || '',
+      product_interest: r.product_interest || '',
+      quanti

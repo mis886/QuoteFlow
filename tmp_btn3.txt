@@ -1,0 +1,1 @@
+"on class=\"btn btn-ghost btn-sm\" style=\"font-size:11px;padding:3px 8px;\" onclick=\"event.stopPropagation();nav('inquiries')\">+ Follow-up</button>\r\n            <div class=\"stage-changer-wrap\" style=\"position:relative;display:inline-block;\">\r\n              <button class=\"btn btn-ghost btn-sm\" style=\"font-size:11p"

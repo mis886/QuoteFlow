@@ -1,0 +1,38 @@
+<div class="page" id="page-customers">
+        <div class="section-header">
+          <div>
+            <!--<div class="section-title">Customer Master</div>-->
+            <div class="section-subtitle" id="cust-subtitle">0 customers</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--gray400);fill:none;stroke-width:2;pointer-events:none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="cust-search" placeholder="Search customers…" oninput="renderCustomers()">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openNewCustomerModal()">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add Customer
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable-th" onclick="sortCustomers('company')">Company <span class="sort-arrow" id="sort-company"> ↑</span></th>
+                  <th>Primary Contact</th>
+                  <th class="sortable-th" onclick="sortCustomers('industry')">Industry <span class="sort-arrow" id="sort-industry"></span></th>
+                  <th class="sortable-th" onclick="sortCustomers('turnover')">Turnover <span class="sort-arrow" id="sort-turnover"></span></th>
+                  <th>Incoterms</th>
+                  <th class="sortable-th" onclick="sortCustomers('rating')">Rating <span class="sort-arrow" id="sort-rating"></span></th>
+                  <th class="sortable-th" onclick="sortCustomers('nextorder')">Next Order <span class="sort-arrow" id="sort-nextorder"></span></th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customers-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>

@@ -1,0 +1,105 @@
+<div class="page" id="page-pipeline">
+        <div class="section-header">
+          <div>
+            <!--<div class="section-title">Sales Pipeline</div>-->
+            <div class="section-subtitle">Lead → Quote → Sample → Order · <span class="sync-indicator"><span class="sync-dot"></span>Live from Supabase</span></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <select id="pipeline-filter-stage" class="btn btn-secondary btn-sm" onchange="renderPipeline()">
+              <option value="">All Stages</option>
+              <option value="lead">Lead</option><option value="quoted">Quoted</option>
+              <option value="sampling">Sampling</option><option value="negotiating">Negotiating</option>
+              <option value="won">Won</option><option value="lost">Lost</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="nav('inquiries');setTimeout(openAddInquiryModal,250)">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>+ Add Inquiry
+            </button>
+          </div>
+        </div>
+        <div class="journey-pipeline" id="pipeline-funnel">
+        <div class="jp-stage" onclick="setStageFilter('lead')">
+          <div class="jp-label">Lead</div>
+          <div class="jp-count">0</div>
+          <div class="jp-val">—</div>
+        </div>
+        <div class="jp-stage" onclick="setStageFilter('quoted')">
+          <div class="jp-label">Quoted</div>
+          <div class="jp-count">1</div>
+          <div class="jp-val">₹122.5L</div>
+        </div>
+        <div class="jp-stage" onclick="setStageFilter('sampling')">
+          <div class="jp-label">Sampling</div>
+          <div class="jp-count">0</div>
+          <div class="jp-val">—</div>
+        </div>
+        <div class="jp-stage" onclick="setStageFilter('negotiating')">
+          <div class="jp-label">Negotiating</div>
+          <div class="jp-count">0</div>
+          <div class="jp-val">—</div>
+        </div>
+        <div class="jp-stage" onclick="setStageFilter('won')">
+          <div class="jp-label">Won</div>
+          <div class="jp-count">0</div>
+          <div class="jp-val">—</div>
+        </div>
+        <div class="jp-stage" onclick="setStageFilter('lost')">
+          <div class="jp-label">Lost</div>
+          <div class="jp-count">0</div>
+          <div class="jp-val">—</div>
+        </div></div>
+        <div id="followup-alerts" style="margin-bottom:16px;"></div>
+        <div id="pipeline-deals-list">
+      <div class="lead-card on-track" onclick="previewQuote('QF-2026-002')">
+        <div class="lc-avatar" style="background:#7C3AED;">RA</div>
+        <div class="lc-body">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="lc-company">RAJSHA CHEMICALS PVT LTD</span>
+            <span class="badge badge-teal" style="font-size:10px;">Existing</span>
+            <span class="badge badge-blue" style="font-size:10px;cursor:pointer;" onclick="event.stopPropagation();previewQuote('QF-2026-002')">QF-2026-002</span>
+            <span class="source-pill source-gmail" style="margin-left:4px;">Gmail</span>
+          </div>
+          <div class="lc-product">—</div>
+          <div class="lc-meta">
+            <span class="badge badge-blue">Quoted</span>
+            <span style="font-size:11px;color:var(--gray400);">Follow-up #0 · 7 left</span>
+            <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();openFollowupModal('QF-2026-002')">+ Follow-up</button>
+            
+            <div class="stage-changer-wrap" style="position:relative;display:inline-block;">
+              <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray200);" onclick="event.stopPropagation();toggleStageDropdown('sdrop_QF-2026-002')">⋯ Status</button>
+              <div id="sdrop_QF-2026-002" class="stage-dropdown" style="display:none;position:absolute;bottom:calc(100% + 4px);left:0;background:var(--white);border:1px solid var(--gray200);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:140px;padding:4px 0;">
+                
+                  <div class="stage-drop-item" style="padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--gray700);background:transparent;" onclick="event.stopPropagation();toggleStageDropdown('sdrop_QF-2026-002');changeLeadStageFromCard('QF-2026-002','lead')">
+                    <span class="badge badge-gray" style="font-size:10px;">Lead</span>
+                    
+                  </div>
+                  <div class="stage-drop-item active" style="padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--primary);background:var(--primary-light);" onclick="event.stopPropagation();toggleStageDropdown('sdrop_QF-2026-002');changeLeadStageFromCard('QF-2026-002','quoted')">
+                    <span class="badge badge-blue" style="font-size:10px;">Quoted</span>
+                    ✓
+                  </div>
+                  <div class="stage-drop-item" style="padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--gray700);background:transparent;" onclick="event.stopPropagation();toggleStageDropdown('sdrop_QF-2026-002');changeLeadStageFromCard('QF-2026-002','sampling')">
+                    <span class="badge badge-purple" style="font-size:10px;">Sampling</span>
+                    
+                  </div>
+                  <div class="stage-drop-item" style="padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--gray700);background:transparent;" onclick="event.stopPropagation();toggleStageDropdown('sdrop_QF-2026-002');changeLeadStageFromCard('QF-2026-002','negotiating')">
+                    <span class="badge badge-amber" style="font-size:10px;">Negotiating</span>
+                    
+                  </div>
+                  <div class="stage-drop-item" style="padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--gray700);background:transparent;" onclick="event.stopPropagation();toggleStageDropdown('sdrop_QF-2026-002');changeLeadStageFromCard('QF-2026-002','won')">
+                    <span class="badge badge-teal" style="font-size:10px;">Won</span>
+                    
+                  </div>
+                  <div class="stage-drop-item" style="padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--gray700);background:transparent;" onclick="event.stopPropagation();toggleStageDropdown('sdrop_QF-2026-002');changeLeadStageFromCard('QF-2026-002','lost')">
+                    <span class="badge badge-red" style="font-size:10px;">Lost</span>
+                    
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lc-right">
+          <div class="lc-value">₹122.52L</div>
+          <span class="lc-followup followup-upcoming">Due in 27d</span>
+          <div style="font-size:10px;color:var(--gray400);">Last: 4d ago</div>
+        </div>
+      </div></div>
+      </div>

@@ -1,0 +1,75 @@
+function renderPipeline() {
+  const filterStage = document.getElementById('pipeline-filter-stage')?.value || '';
+  const filtered = filterStage ? DB.leads.filter(l => l.stage === filterStage) : DB.leads;
+
+  // Funnel
+  const funnel = document.getElementById('pipeline-funnel');
+  if (funnel) {
+    const stages = ['lead','quoted','sampling','negotiating','won','lost'];
+    funnel.innerHTML = stages.map(s => {
+      const items = DB.leads.filter(l => l.stage === s);
+      const val = items.reduce((a,b) => a + b.value, 0);
+      const isActive = filterStage === s;
+      return `
+        <div class="jp-stage${isActive?' active-stage':''}" onclick="setStageFilter('${s}')">
+          <div class="jp-label">${STAGE_CONFIG[s].label}</div>
+          <div class="jp-count">${items.length}</div>
+          <div class="jp-val">${val > 0 ? '₹'+(val/100000).toFixed(1)+'L' : '—'}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // Followup alerts
+  const alertEl = document.getElementById('followup-alerts');
+  if (alertEl) {
+    const followupStages = ['lead', 'quoted'];
+    const overdue = DB.leads.filter(l => l.nextFollowup && daysUntil(l.nextFollowup) < 0 && followupStages.includes(l.stage));
+    const dueToday = DB.leads.filter(l => l.nextFollowup && daysUntil(l.nextFollowup) === 0 && followupStages.includes(l.stage));
+    const alerts = [];
+    if (overdue.length) alerts.push(`<div style="background:var(--red-light);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><strong>${overdue.length} lead${overdue.length>1?'s':''} with overdue follow-ups:</strong> ${overdue.map(l=>l.company).join(', ')}</div>`);
+    if (dueToday.length) alerts.push(`<div style="background:var(--amber-light);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--amber);display:flex;align-items:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><strong>${dueToday.length} lead${dueToday.length>1?'s':''} due today:</strong> ${dueToday.map(l=>l.company).join(', ')}</div>`);
+    alertEl.innerHTML = alerts.length ? `<div style="display:flex;flex-direction:column;gap:8px;">${alerts.join('')}</div>` : '';
+  }
+
+  // Deals list
+  const list = document.getElementById('pipeline-deals-list');
+  if (!list) return;
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div><div class="empty-title">No leads in this stage</div><div class="empty-desc">Add a lead or change the filter.</div></div>`;
+    return;
+  }
+  // Sort: urgent first
+  const sorted = [...filtered].sort((a,b) => {
+    const ua = daysUntil(a.nextFollowup); const ub = daysUntil(b.nextFollowup);
+    return (ua ?? 999) - (ub ?? 999);
+  });
+  list.innerHTML = sorted.map(lead => {
+    const urgency = leadUrgencyClass(lead);
+    const fupClass = followupClass(lead.nextFollowup);
+    const fupLabel = followupLabel(lead.nextFollowup);
+    const daysSinceLast = daysAgo(lead.lastFollowup);
+    const followupsLeft = 7 - lead.followupCount;
+    const isExBadge = lead.isExisting ? `<span class="badge badge-teal" style="font-size:10px;">Existing</span>` : `<span class="badge badge-gray" style="font-size:10px;">New</span>`;
+    const sourceLabel = {indiamart:'Indiamart',gmail:'Gmail',referral:'Referral',exhibition:'Exhibition',manual:'Manual'}[lead.source] || lead.source;
+    const qBadge = lead.quoteId ? `<span class="badge badge-blue" style="font-size:10px;cursor:pointer;" onclick="event.stopPropagation();previewQuote('${lead.quoteId}')">${lead.quoteId}</span>` : '';
+    const productLine = lead.product ? `${lead.product}${lead.qty?' · '+lead.qty:''}${lead.industry?' · '+lead.industry:''}` : (lead.industry || '');
+    return `
+      <div class="lead-card ${urgency}" onclick="${lead.quoteId ? `previewQuote('${lead.quoteId}')` : `openLeadDrawer('${lead.id}')`}">
+        <div class="lc-avatar" style="background:${lead.color};">${lead.company.slice(0,2).toUpperCase()}</div>
+        <div class="lc-body">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="lc-company">${lead.company}</span>
+            ${isExBadge}
+            ${qBadge}
+            <span class="source-pill source-${lead.source}" style="margin-left:4px;">${sourceLabel}</span>
+          </div>
+          <div class="lc-product">${productLine || '—'}</div>
+          <div class="lc-meta">
+            <span class="badge badge-${lead.stage==='won'?'teal':lead.stage==='lost'?'red':lead.stage==='quoted'?'blue':lead.stage==='sampling'?'purple':lead.stage==='negotiating'?'amber':'gray'}">${STAGE_CONFIG[lead.stage]?.label||lead.stage}</span>
+            ${['lead','quoted'].includes(lead.stage) ? `<span style="font-size:11px;color:var(--gray400);">Follow-up #${lead.followupCount} · ${followupsLeft > 0 ? followupsLeft+' left' : '⚠ Max reached'}</span>` : ''}
+            ${['lead','quoted'].includes(lead.stage) ? `<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();openFollowupModal('${lead.id}')">+ Follow-up</button>` : ''}
+            ${lead.stage === 'lead' ? `<button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();convertToQuote('${lead.id}')">→ Quote</button>` : ''}
+            <div class="stage-changer-wrap" style="position:relative;display:inline-block;">
+              <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray200);" onclick="event.stopPropagation();toggleStageDropdown('sdrop_${lead.id}')">⋯ Status</button>
+              <div id="sdrop_${lead.id}" class="stage-dropdown" style="display:none;position:absolute;bottom:calc(100% + 4px);left:0;background:var(--white);border:1px solid var(--gray200);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:140px;padding:4px 0;">
+                ${Obj

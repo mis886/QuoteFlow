@@ -1,0 +1,21 @@
+function selectProduct(rowId, name, hsn, rate, unit, gst) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  const productInput = row.querySelector('.li-product');
+  const hsnInput     = row.querySelector('.li-hsn');
+  const rateInput    = row.querySelector('.li-rate');
+  const basisSel     = row.querySelector('.li-basis');
+  const gstSel       = row.querySelector('.li-gst');
+  if (productInput) productInput.value = name;
+  if (hsnInput)     hsnInput.value     = hsn;
+  if (rateInput)    rateInput.value    = rate;
+  if (basisSel)     { for (const o of basisSel.options) { if (o.text.toLowerCase().includes(unit.toLowerCase())) { basisSel.value = o.value; break; } } }
+  if (gstSel)       gstSel.value       = String(gst);
+  hideProductSuggest(rowId);
+  recalcTotals();
+}
+
+function removeLineItem(id) {
+  const row = docu
+
+---nav:141574 loadProd:185871

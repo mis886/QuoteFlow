@@ -1,0 +1,7 @@
+lc-meta">
+            <span class="badge badge-${lead.stage==='won'?'teal':lead.stage==='lost'?'red':lead.stage==='quoted'?'blue':lead.stage==='sampling'?'purple':lead.stage==='negotiating'?'amber':'gray'}">${STAGE_CONFIG[lead.stage]?.label||lead.stage}</span>
+            ${['lead','quoted'].includes(lead.stage) ? `<span style="font-size:11px;color:var(--gray400);">Follow-up #${lead.followupCount} · ${followupsLeft > 0 ? followupsLeft+' left' : '⚠ Max reached'}</span>` : ''}
+            ${['lead','quoted'].includes(lead.stage) ? `<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();openFollowupModal('${lead.id}')">+ Follow-up</button>` : ''}
+            ${lead.stage === 'lead' ? `<button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();convertToQuote('${lead.id}')">→ Quote</button>` : ''}
+            <div class="stage-changer-wrap" style="position:relative;display:inline-block;">
+              <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 8px;border:1px solid var(--gray200);" onclick="event.stopPropagation();toggleStageDropdown('sdrop_${le

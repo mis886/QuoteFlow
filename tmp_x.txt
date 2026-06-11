@@ -1,0 +1,5 @@
+hasCat:false
+nav:S[page] || page;
+  if (page === 'new-quote') initNewQuote();
+  if (page === 'customers') { renderCustomers(); loadCustomersFromSupabase(); }
+  if (page === 'reports') 

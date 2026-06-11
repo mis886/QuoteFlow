@@ -1,0 +1,48 @@
+<div class="page" id="page-reports">
+        <div class="section-header">
+          <div>
+            <!--<div class="section-title">Analytics &amp; Reports</div>-->
+            <div class="section-subtitle">Powered by live Supabase data</div>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="stat-card blue"><div class="stat-label">This Month Quotes</div><div class="stat-value">14</div><div class="stat-change up">↑ from 11 last month</div></div>
+          <div class="stat-card teal"><div class="stat-label">Pipeline Value</div><div class="stat-value">₹53.3L</div><div class="stat-change up">↑ 15% MoM</div></div>
+          <div class="stat-card amber"><div class="stat-label">Avg. Quote Value</div><div class="stat-value">₹1.8L</div><div class="stat-change up">↑ 6%</div></div>
+          <div class="stat-card purple"><div class="stat-label">Avg. Response Time</div><div class="stat-value">4.2h</div><div class="stat-change down">↑ 0.5h slower</div></div>
+        </div>
+
+        <div class="two-col" style="margin-bottom:20px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quotes by Customer (Top 6)</div></div>
+            <div class="card-body">
+              <div class="chart-bar-wrap" id="report-cust-chart"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Status Breakdown</div></div>
+            <div class="card-body">
+              <div class="chart-bar-wrap" id="report-status-chart"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Quotations Export</div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Quote No.</th><th>Customer</th><th>Value</th><th>Source</th><th>Status</th><th>Sent Date</th><th>Won/Lost</th></tr></thead>
+              <tbody id="reports-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>

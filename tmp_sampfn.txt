@@ -1,0 +1,59 @@
+function loadSamplesFromSupabase() {
+  try {
+    const { data, error } = await _sb.from('samples').select('*').order('sent_date', { ascending: false });
+    if (error) throw error;
+    DB.samples = (data || []).map(r => ({
+      id:          r.sample_id,
+      customer:    DB.customers.find(c => c.id === r.customer_id)?.company || r.customer_id || '—',
+      customerId:  r.customer_id,
+      leadId:      r.lead_id,
+      product:     r.product_name || r.product_code || '—',
+      qty:         r.quantity ? `${r.quantity} ${r.unit || ''}`.trim() : '—',
+      sentDate:    r.sent_date || '',
+      status:      r.status || 'dispatched',
+      outcome:     r.outcome || null,
+      followupDue: r.sent_date ? (() => { const d = new Date(r.sent_date); d.setDate(d.getDate()+7); return d.toISOString().split('T')[0]; })() : '',
+      notes:       r.notes || '',
+    }));
+    const pending = DB.samples.filter(s => s.status === 'dispatched' || s.status === 'awaiting').length;
+    updateNavBadge('nav-badge-sampling', pending);
+    if (document.getElementById('samples-table-body')) renderSampling();
+  } catch(e) {
+    console.warn('loadSamplesFromSupabase:', e.message);
+  }
+}
+
+async function loadQuotesFromSupabase() {
+  try {
+    const { data, error } = await _sb.from('quotes').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    DB.quotes = (data || []).map(r => ({
+      id:         r.quote_id,
+      customer:   r.customer_name,
+      customerId: r.customer_id,
+      items:      r.line_items_count || 0,
+      value:      parseFloat(r.grand_total) || 0,
+      status:     r.status,
+      incoterms:  r.incoterms,
+      date:       r.quote_date,
+      source:     r.source,
+      validUntil: r.valid_until,
+      payment:    r.payment_terms,
+      subtotal:   parseFloat(r.subtotal) || 0,
+      gst:        parseFloat(r.gst_amount) || 0,
+      freight:    parseFloat(r.freight) || 0,
+      insurance:  parseFloat(r.insurance) || 0,
+      discountPct:parseFloat(r.discount_pct) || 0,
+      notes:      r.notes,
+      createdBy:  r.created_by,
+    }));
+    renderQuotations();
+    renderDashboard();
+    loadPipelineFromSupabase();   // rebuild pipeline cards from live quotes
+  } catch(e) {
+    console.warn('loadQuotesFromSupabase:', e.message);
+  }
+}
+
+// ── PIPELINE FROM SUPABASE QUOTES ────────────────────────────────────────────
+// Maps each quote into a pipeline "lead" card so the pipeline ref
